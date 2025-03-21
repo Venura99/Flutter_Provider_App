@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:provider_flutter/data/product_data.dart';
 import 'package:provider_flutter/models/product_model.dart';
 import 'package:provider_flutter/pages/cart_page.dart';
 import 'package:provider_flutter/pages/favourite_page.dart';
+import 'package:provider_flutter/providers/cart_provider.dart';
 
 class ProductsPage extends StatelessWidget {
   const ProductsPage({super.key});
@@ -12,7 +14,7 @@ class ProductsPage extends StatelessWidget {
    final List<Product> products = ProductData().products;
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Flutter Shop", 
+        title: const Text("Fashion Shop", 
         style: TextStyle(
           color: Colors.deepOrange,
           fontWeight: FontWeight.bold,
@@ -58,49 +60,75 @@ class ProductsPage extends StatelessWidget {
         itemBuilder:  (context, index){
           final Product product = products[index];
           return Card(
-            child: ListTile(
-              title: Row(
-                children: [
-                  Text(
-                    product.title, 
-                    style: TextStyle(
-                    fontWeight: FontWeight.bold,
+            child: Consumer<CartProvider>(
+              builder: (BuildContext context, CartProvider cartProvider, 
+              Widget? child) { 
+                return ListTile(
+                title: Row(
+                  children: [
+                    Text(
+                      product.title, 
+                      style: TextStyle(
+                      fontWeight: FontWeight.bold,
+              
+                    )),
+                    // const SizedBox(width: 50,),
+                    // Text(
+                    //   cartProvider.items.containsKey(product.id) ?
+                    //   cartProvider.items[product.id]!.quantity.toString()
+                    //   : "0", 
+                    //   style: TextStyle(
+                    //     fontWeight: FontWeight.bold,
+                    //   ),),
+                  ],
+                ),
+                subtitle: 
+                Text("\$${product.price.toString()} | Qty : ${
+                  cartProvider.items.containsKey(product.id) ?
+                      cartProvider.items[product.id]!.quantity.toString()
+                      : "0"
+                }"),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      onPressed: () {
+                      Navigator.push(context, 
+                      MaterialPageRoute(
+                        builder: (context) => const FavouritePage()
+                        ),
+                        );
+                    }, 
+                    icon: const Icon(
+                      Icons.favorite)
+                    ),
+                    IconButton(
+                      onPressed: () {
+                        cartProvider.addItem(
+                          product.id, 
+                          product.price, 
+                          product.title
+                          );
 
-                  )),
-                  const SizedBox(width: 50,),
-                  //todo fill this
-                  Text("0"),
-                ],
-              ),
-              subtitle: Text("\$${product.price.toString()}"),
-              trailing: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  IconButton(
-                    onPressed: () {
-                    Navigator.push(context, 
-                    MaterialPageRoute(
-                      builder: (context) => const FavouritePage()
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text("Added to cart successfully!"),
+                              duration:  const Duration(seconds: 1),
+                              ),
+                           );
+                    }, 
+                    icon:  Icon(
+                      Icons.shopping_cart,
+                      color: cartProvider.items.containsKey(product.id)
+                       ? Colors.orange
+                       : Colors.grey,
                       ),
-                      );
-                  }, 
-                  icon: const Icon(
-                    Icons.favorite)
-                  ),
-                  IconButton(
-                    onPressed: () {
-                    Navigator.push(context, 
-                    MaterialPageRoute(
-                      builder: (context) => const CartPage()
-                      ),
-                      );
-                  }, 
-                  icon: const Icon(
-                    Icons.shopping_cart)
-                  ),
-                ],
-              ),
-              )
+                    ),
+                  ],
+                ),
+                );
+               },
+            )
           );
         }
         ),
