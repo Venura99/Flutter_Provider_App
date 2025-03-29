@@ -5,6 +5,7 @@ import 'package:provider_flutter/models/product_model.dart';
 import 'package:provider_flutter/pages/cart_page.dart';
 import 'package:provider_flutter/pages/favourite_page.dart';
 import 'package:provider_flutter/providers/cart_provider.dart';
+import 'package:provider_flutter/providers/favourite_provider.dart';
 
 class ProductsPage extends StatelessWidget {
   const ProductsPage({super.key});
@@ -60,11 +61,11 @@ class ProductsPage extends StatelessWidget {
         itemBuilder:  (context, index){
           final Product product = products[index];
           return Card(
-            child: Consumer<CartProvider>(
-              builder: (BuildContext context, CartProvider cartProvider, 
+            child: Consumer2<CartProvider, FavouriteProvider>(
+              builder: (BuildContext context, CartProvider cartProvider, FavouriteProvider favProvider,
               Widget? child) { 
                 return ListTile(
-                title: Row(
+                title: Row( 
                   children: [
                     Text(
                       product.title, 
@@ -93,14 +94,19 @@ class ProductsPage extends StatelessWidget {
                   children: [
                     IconButton(
                       onPressed: () {
-                      Navigator.push(context, 
-                      MaterialPageRoute(
-                        builder: (context) => const FavouritePage()
-                        ),
+                        favProvider.togggleFavourites(product.id);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                            favProvider.isFavourite(product.id) ? "Added to favourites!" : "Removed from favourites"),
+                            duration: Duration(seconds: 1),
+                            )
                         );
                     }, 
-                    icon: const Icon(
-                      Icons.favorite)
+                    icon:  Icon(
+                      favProvider.isFavourite(product.id) ? Icons.favorite : Icons.favorite_border,
+                      color: favProvider.isFavourite(product.id) ? Colors.pinkAccent : Colors.grey, 
+                      )
                     ),
                     IconButton(
                       onPressed: () {
